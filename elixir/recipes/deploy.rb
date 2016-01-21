@@ -4,6 +4,8 @@
 # Recipe:: deploy
 #
 
+include_recipe 'deploy'
+
 # This deploys the application
 node[:deploy].each do |application, deploy|
   opsworks_deploy do
