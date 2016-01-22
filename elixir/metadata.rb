@@ -6,6 +6,4 @@ description 'Installs/Configures elixir'
 long_description 'Installs/Configures elixir'
 version '0.1.0'
 
-# depends 'erlang'
-# depends 'build-essential'
-# depends 'poise-python'
+depends 'elixir'
