@@ -7,7 +7,11 @@ bash "yum groupinstall Development tools" do
   not_if "yum grouplist installed | grep 'Development tools'"
 end
 
-# curl --silent --location https://rpm.nodesource.com/setup_4.x | bash -
+bash "add npm node 4.x source" do
+  code <<-EOC
+    curl --silent --location https://rpm.nodesource.com/setup_4.x | bash -
+  EOC
+end
 
 %w(
   ncurses-devel
@@ -15,38 +19,55 @@ end
   openssl-devel
   nodejs
   npm
-  erlang
 ).each do |pkg|
-  options "--enablerepo=epel"
-  package pkg
+  package pkg do
+    options "--enablerepo=epel"
+  end
 end
-#
-# bash 'install-erlang' do
-#   cwd Chef::Config[:file_cache_path]
-#   code <<-EOH
-#     tar -xzf otp_src_#{erlang_version}.tar.gz
-#     (cd otp_src_#{erlang_version} && ./configure && make && make install)
-#   EOH
-#   # environment('CFLAGS' => erlang_cflags)
-#   action :nothing
-#   not_if "erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell | grep #{erlang_version}"
-# end
 
-#
-# # dev tools to compile and build
-# sudo yum groupinstall "Development Tools"
-# sudo yum install ncurses-devel
-# sudo yum install java-1.8.0-openjdk-devel
-# sudo yum install openssl-devel
+erlang_version = "18.2.1"
 
-# install erlang
-#
-# wget http://www.erlang.org/download/otp_src_18.0.tar.gz
-# tar -zxvf otp_src_18.0.tar.gz
-# cd otp_src_18.0
-# ./configure
-# make
-# make install
+bash 'install-erlang' do
+  cwd Chef::Config[:file_cache_path]
+  code <<-EOH
+    wget http://www.erlang.org/download/otp_src_#{erlang_version}.tar.gz
+    tar -zxvf otp_src_#{erlang_version}.tar.gz
+    cd otp_src_#{erlang_version}
+    ./configure
+    make
+    make install
+  EOH
+  # environment('CFLAGS' => erlang_cflags)
+  not_if "erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().' -noshell | grep #{erlang_version}"
+end
+
+
+bash 'link erlang' do
+  code <<-EOC
+    export PATH=/usr/local/bin:$PATH
+  EOC
+end
+
+elixir_version = "1.2.1"
+
+bash 'install-elixir' do
+  code <<-EOC
+    mkdir elixir
+    cd elixir
+    wget https://github.com/elixir-lang/elixir/releases/download/v1.2.1/Precompiled.zip
+    unzip Precompiled.zip
+    rm Precompiled.zip
+    export PATH=$(pwd)/bin:$PATH
+    mix local.hex --force
+  EOC
+end
+
+# * download repo
+# * npm install
+# * cd clients/bookingWidget && npm install
+# * gulp dependencies
+# * mix phoenix.digest
+# * MIX_ENV=prod mix release
 
 # get inotify
 
@@ -58,17 +79,3 @@ end
 # sudo make install
 
 # you may need to tweak inotify per https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers if you get errors
-#
-# # elixir
-# mkdir elixir
-# cd elixir
-# wget https://github.com/elixir-lang/elixir/releases/download/v1.2.1/Precompiled.zip
-# unzip Precompiled.zip
-# rm Precompiled.zip
-# export PATH=$(pwd):$PATH
-#
-# mix local.hex --force
-#
-# # Download git repo, checkout hash
-#
-# npm install
