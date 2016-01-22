@@ -43,16 +43,16 @@ puts app.inspect
 #     EOH
 #   not_if { ::File.exists?(extract_path) }
 # end
+#
+# application app_path do
+#   environment.update("PORT" => "80")
 
-application app_path do
-  environment.update("PORT" => "80")
-
-  remote_file 'archive_filepath' do
-    source app['app_source']['url']
-    owner 'root'
-    group 'root'
-    mode '0755'
-  end
+remote_file 'latest.tar.gz' do
+  source app['app_source']['url']
+  owner 'root'
+  group 'root'
+  mode '0755'
+end
   #
   # git app_path do
   #   repository app['app_source']['url']
@@ -76,4 +76,4 @@ application app_path do
   # end
   #
   # gunicorn
-end
+# end
