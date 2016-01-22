@@ -1,4 +1,4 @@
-name 'elixir'
+name 'sched'
 maintainer 'The Authors'
 maintainer_email 'you@example.com'
 license 'all_rights'
